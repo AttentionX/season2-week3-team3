@@ -5,6 +5,8 @@ import replicate
 import pypdf
 from utils import save_json_file
 
+PAPERS_DIR = "papers"
+
 load_dotenv()
 
 def extract_text_from_pdf(pdf_path, result_path):
@@ -64,4 +66,5 @@ def process_pdf(pdf_path):
 
 
 if __name__ == "__main__":
-    process_pdf("LP-FT.pdf")
+    for file in os.listdir(PAPERS_DIR):
+        process_pdf(os.path.join(PAPERS_DIR, file))
