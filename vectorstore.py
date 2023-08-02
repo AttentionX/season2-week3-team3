@@ -5,6 +5,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
 from dataclasses import dataclass
+from utils import load_from_jsonl
 
 load_dotenv()
 
@@ -24,7 +25,6 @@ class Document:
     metadata: Dict
 
 def embed(documents: List[Document]):
-    
     contents = [doc.content for doc in documents]
     collection.add(
         embeddings=openai_ef(contents),
@@ -33,6 +33,8 @@ def embed(documents: List[Document]):
         ids=[str(one_id) for one_id in list(range(id, id+len(documents)))]
     )
     id += len(documents)
+    print(f"Successfully saved {len(documents)} documents")
+    
 
 def query(q: str, filter: Dict, top_k: int=5):
     return collection.query(
@@ -41,4 +43,7 @@ def query(q: str, filter: Dict, top_k: int=5):
         where=filter
     )
 
-embed("Hey")
+
+def main():
+    text_per_page = load_from_jsonl("text_per_page.json")
+    embed([Document(content=text, metadata={"page": index}) for index, text in enumerate(text_per_page)])

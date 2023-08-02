@@ -2,6 +2,7 @@ import os
 import json
 import replicate
 import pypdf
+from utils import save_json_file
 
 
 def extract_text_from_pdf(pdf_path, result_path):
@@ -37,12 +38,6 @@ def generate_caption(image_path):
         }
     )
     return output
-
-
-def save_json_file(file_path, data):
-    json_string = json.dumps(data, indent=4)
-    with open(file_path, "w") as json_file:
-        json_file.write(json_string)
 
 
 def process_pdf(pdf_path):
