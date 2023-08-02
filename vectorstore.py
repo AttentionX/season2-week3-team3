@@ -14,7 +14,7 @@ openai_ef = embedding_functions.OpenAIEmbeddingFunction(
             )
 id=0
 
-client = chromadb.PersistentClient(path="/data")
+client = chromadb.Client()
 
 collection = client.create_collection("papers")
 
@@ -39,3 +39,5 @@ def query(q: str, filter: Dict, top_k: int=5):
         n_results=top_k,
         where=filter
     )
+
+embed("Hey")
