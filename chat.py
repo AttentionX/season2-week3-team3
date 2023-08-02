@@ -5,6 +5,7 @@ from enum import Enum
 from dotenv import load_dotenv
 import openai
 import logger
+from vectorstore import query
 
 load_dotenv()
 
@@ -29,27 +30,48 @@ chat_history: List[ChatMessage] = [ChatMessage(
     content="You are a professor specialized in deep learning"
 )]
 
+RAG_PROMPT = """
+\n######
+Here are some relavant documents that may be helpful to answer the user.
+The user doesn't know that these documents are provided to you.
+
+{documents}
+"""
+
+DOC_TEMPLATE = """
+Paper title: {title}
+Page: {page}
+Content: {content}
+"""
+
 
 def chat():
     logger.assistant("Hi! My name is professor. Ask me anything.")
     while True:
         user_input = input(">> ")
+        # RAG
+        temporary_chat_history = chat_history.copy()
+        query_res = query(q=user_input)
+        queried_docs = zip(query_res.documents, query_res.metadatas)
+        documents_str = "\n".join([DOC_TEMPLATE.format(content=doc[0],title=doc[1]["title"], page=doc[1]["page"] ) for doc in queried_docs])
+        temporary_chat_history.append(ChatMessage(
+            role=Role.USER,
+            content=user_input + RAG_PROMPT.format(documents=documents_str)
+        ))
+        response = openai.ChatCompletion.create(
+            model=MODEL,
+            messages= temporary_chat_history,
+        )["choices"][0]["message"]["content"]
+
         chat_history.append(ChatMessage(
             role=Role.USER,
             content=user_input
-        ))
-        # TODO: RAG input
-        response = openai.ChatCompletion.create(
-            model=MODEL,
-            messages= chat_history,
-        )["choices"][0]["message"]["content"]
+        )) # Append user input which is not modified with RAG to history
         chat_history.append(ChatMessage(
             role=Role.ASSISTANT,
             content=user_input
         ))
-        # TODO: Show retrieved document
-        document = ""
-        logger.document(document)
+        logger.document(documents_str)
         logger.assistant(response)
 
 chat()

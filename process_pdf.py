@@ -1,9 +1,11 @@
 import os
+from dotenv import load_dotenv
 import json
 import replicate
 import pypdf
 from utils import save_json_file
 
+load_dotenv()
 
 def extract_text_from_pdf(pdf_path, result_path):
     image_paths = []
@@ -42,7 +44,7 @@ def generate_caption(image_path):
 
 def process_pdf(pdf_path):
     basename = pdf_path.split(".")[0]
-    result_path = f"./{basename}_results"
+    result_path = f"./results/{basename}"
     os.makedirs(result_path, exist_ok=True)
 
     text_per_page, image_paths, image_meta_data = extract_text_from_pdf(pdf_path, result_path)
