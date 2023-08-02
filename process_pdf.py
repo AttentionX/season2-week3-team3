@@ -1,9 +1,10 @@
+import os
 import json
 import replicate
 import pypdf
 
 
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(pdf_path, result_path):
     image_paths = []
     image_meta_data = []
     text_per_page = []
@@ -14,11 +15,12 @@ def extract_text_from_pdf(pdf_path):
             text = page.extract_text()
             text_per_page.append(text)
             for idx, image_file_object in enumerate(page.images):
-                with open(image_file_object.name, "wb") as fp:
+                save_path = os.path.join(result_path, image_file_object.name)
+                with open(save_path, "wb") as fp:
                     fp.write(image_file_object.data)
-                image_paths.append(image_file_object.name)
+                image_paths.append(save_path)
                 image_meta_data.append({
-                    "name": image_file_object.name,
+                    "name": save_path,
                     "page_num": page_num,
                     "position_in_page": idx,
                 })
@@ -44,7 +46,11 @@ def save_json_file(file_path, data):
 
 
 def main(pdf_path):
-    text_per_page, image_paths, image_meta_data = extract_text_from_pdf(pdf_path)
+    basename = pdf_path.split(".")[0]
+    result_path = f"./{basename}_results"
+    os.makedirs(result_path, exist_ok=True)
+
+    text_per_page, image_paths, image_meta_data = extract_text_from_pdf(pdf_path, result_path)
     for idx, image_path in enumerate(image_paths):
         caption = generate_caption(image_path)
         image_meta_data[idx]["caption"] = caption
@@ -54,10 +60,8 @@ def main(pdf_path):
         page_num = image_meta_data[idx]["page_num"]
         text_per_page[page_num] += ("\nFigure. " + caption + "\n")
     
-    save_json_file("text_per_page.json", text_per_page)
-    save_json_file("image_meta_data.json", image_meta_data)
-
-    print("Done!!!")
+    save_json_file(os.path.join(result_path, "text_per_page.json"), text_per_page)
+    save_json_file(os.path.join(result_path, "image_meta_data.json"), image_meta_data)
 
 
 if __name__ == "__main__":
