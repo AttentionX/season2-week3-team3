@@ -66,5 +66,8 @@ def process_pdf(pdf_path):
 
 
 if __name__ == "__main__":
-    for file in os.listdir(PAPERS_DIR):
-        process_pdf(os.path.join(PAPERS_DIR, file))
+    for file in os.listdir("papers"):
+        # Construct the full filepath
+        file_path = os.path.join("papers", file)
+        # Call your function with the filepath as argument
+        process_pdf(file_path)

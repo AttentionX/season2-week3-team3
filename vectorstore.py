@@ -6,19 +6,19 @@ from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
 from dataclasses import dataclass
 from utils import load_from_jsonl
+import uuid
 
-RESULTS_DIR = "results"
+RESULTS_DIR = "results/papers"
 
 load_dotenv()
 
 openai_ef = embedding_functions.OpenAIEmbeddingFunction(
     api_key=os.environ["OPENAI_API_KEY"], model_name="text-embedding-ada-002"
 )
-id = 0
 
 client = chromadb.PersistentClient(path="./vectordb")
 
-collection = client.create_collection("papers")
+collection = client.get_or_create_collection("papers")
 
 
 @dataclass
@@ -29,13 +29,13 @@ class Document:
 
 def embed(documents: List[Document]):
     contents = [doc.content for doc in documents]
+    print(contents)
     collection.add(
         embeddings=openai_ef(contents),
         documents=contents,
         metadatas=[doc.metadata for doc in documents],
-        ids=[str(one_id) for one_id in list(range(id, id + len(documents)))],
+        ids=[str(uuid.uuid4()) for _ in list(range(0, len(documents)))],
     )
-    id += len(documents)
     print(f"Successfully saved {len(documents)} documents")
 
 
@@ -51,7 +51,7 @@ def main():
             # Get the directory name as title
             title = dirname
             # Construct the full file path
-            file_path = os.path.join(dirpath, dirname, "text_per_page.jsonl")
+            file_path = os.path.join(dirpath, dirname, "text_per_page.json")
             text_per_page = load_from_jsonl(file_path)
             embed(
                 [
@@ -59,3 +59,6 @@ def main():
                     for index, text in enumerate(text_per_page)
                 ]
             )
+
+
+# main()

@@ -51,12 +51,12 @@ def chat():
         user_input = input(">> ")
         # RAG
         temporary_chat_history = chat_history.copy()
-        query_res = query(q=user_input)
-        queried_docs = zip(query_res.documents, query_res.metadatas)
-        documents_str = "\n".join([DOC_TEMPLATE.format(content=doc[0],title=doc[1]["title"], page=doc[1]["page"] ) for doc in queried_docs])
+        query_res = query(q=user_input, top_k=1)
+        queried_docs = list(zip(query_res["documents"], query_res["metadatas"]))
+        documents_str = "\n".join([DOC_TEMPLATE.format(content=doc[0],title=doc[1][0]["title"], page=doc[1][0]["page"] ) for doc in queried_docs])
         temporary_chat_history.append(ChatMessage(
             role=Role.USER,
-            content=user_input + RAG_PROMPT.format(documents=documents_str)
+            content=user_input + RAG_PROMPT.format(documents=documents_str[:2000])
         ))
         response = openai.ChatCompletion.create(
             model=MODEL,

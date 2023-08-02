@@ -4,8 +4,7 @@ import json
 def load_from_jsonl(path: str) -> List[str]:
     result = []
     with open(path, 'r', encoding='utf-8') as file:
-        for line in file:
-            result.append(json.loads(line))
+        result = json.load(file)
     return result
 
 
