@@ -24,14 +24,15 @@ class Document:
     metadata: Dict
 
 def embed(documents: List[Document]):
-    id += 1
+    
     contents = [doc.content for doc in documents]
     collection.add(
         embeddings=openai_ef(contents),
         documents=contents,
         metadatas=[doc.metadata for doc in documents],
-        ids=id
+        ids=[str(one_id) for one_id in list(range(id, id+len(documents)))]
     )
+    id += len(documents)
 
 def query(q: str, filter: Dict, top_k: int=5):
     return collection.query(
