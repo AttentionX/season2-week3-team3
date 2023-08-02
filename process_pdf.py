@@ -45,7 +45,7 @@ def save_json_file(file_path, data):
         json_file.write(json_string)
 
 
-def main(pdf_path):
+def process_pdf(pdf_path):
     basename = pdf_path.split(".")[0]
     result_path = f"./{basename}_results"
     os.makedirs(result_path, exist_ok=True)
@@ -63,6 +63,8 @@ def main(pdf_path):
     save_json_file(os.path.join(result_path, "text_per_page.json"), text_per_page)
     save_json_file(os.path.join(result_path, "image_meta_data.json"), image_meta_data)
 
+    return text_per_page
+
 
 if __name__ == "__main__":
-    main("LP-FT.pdf")
+    process_pdf("LP-FT.pdf")
